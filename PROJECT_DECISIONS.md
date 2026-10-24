@@ -16,7 +16,7 @@ Temel referans: [Automated Gherkin and BDD Test Scenario Generator.md](Automated
 |----|------|-------|-------|
 | D-01 | Programlama dili | Java | Kesinleşti |
 | D-02 | Kullanıcı arayüzü | Masaüstü mı web mi, henüz seçilmedi | Karar bekliyor |
-| D-03 | Girdi kaynağı | Jira CSV'de yalnızca **Issue Type** ve **Summary** sütunları kullanılacak | Kısmen karar verildi |
+| D-03 | Girdi kaynağı | Jira CSV'de yalnızca **Issue Type** ve **Summary** sütunları kullanılacak. Summary, "As a…" kalıbında ya da EARS kalıbında olabilir | Kısmen karar verildi |
 | D-04 | Yapay zeka entegrasyonu | Üretilen Gherkin'i doğrulamak için opsiyonel bir AI bileşeni (örnek amaçlı) | Kısmen karar verildi |
 | D-05 | Veri saklama ve kullanıcı sistemi | Hafif veritabanı, login ve kullanıcı geçmişi | Kısmen karar verildi |
 | D-06 | Spesifikasyon bağlılığı | Referans dokümandaki gereksinimlere ve tasarım kalıplarına sadık kalınacak | Kesinleşti |
@@ -48,16 +48,18 @@ Temel referans: [Automated Gherkin and BDD Test Scenario Generator.md](Automated
 
 - **Karar:** Girdi olarak bir Jira CSV dosyası alınacak. Sistem bu dosyadan yalnızca iki sütunu okuyacak:
   - **Issue Type:** Hangi satırların user story olduğunu belirler.
-  - **Summary:** User story metnini içerir ve parse edilecek kısım budur.
+  - **Summary:** Requirement metnini içerir ve parse edilecek kısım budur. Metin iki formattan birinde olabilir: user story kalıbı ("As a [role] I want [capability] so that [benefit]") veya EARS kalıbı ("The system shall…", "When [trigger], the system shall…" vb.).
+- **Terminoloji:** "User story" Jira'daki **Story** issue tipini ifade eder. Bu öğenin Summary metninin formatı (user story kalıbı ya da EARS) ayrı bir kavramdır. Genel girdi birimi için "requirement" terimi kullanılır.
 - **Durum:** Kısmen karar verildi. Kullanılacak sütunlar belirlendi. Epic'lerin işlenmesi, Description kullanımı ve format sınırları açık.
 - **Örnek CSV'den gözlemler** (`Jira Backlog Örneği.csv`):
   - Toplam 16 satır: 3 **Epic** (UI, Shopping Cart, Checkout and Payment) ve 13 **Story** (KAN-10 – KAN-22).
-  - Tüm Story'lerin **Summary** alanı, "As a [role] I want [capability] so that [benefit]." kalıbına yakın. Bununla birlikte 13 Story'nin 2'sinde (KAN-10, KAN-11) "so that" cümlesi yok.
+  - Tüm Story'lerin **Summary** alanı, "As a [role] I want [capability] so that [benefit]." kalıbına yakın. Bununla birlikte 13 Story'nin 2'sinde (KAN-10, KAN-11) "so that" cümlesi yok. Örnekte henüz EARS formatında bir satır yok.
   - **Description** sütunu örnekte tüm satırlarda boş. Bu yüzden ilk sürümde user story metni yalnızca Summary'den alınacak.
   - Export'ta **Parent / Epic bağlantısı** sütunu yok. Story'ler hangi Epic'e ait, bu dosyadan anlaşılamıyor.
   - Dosyanın sonunda boş bir satır var. Parser bunu hata olarak değil, boş satır olarak ele almalı.
-- **Referans:** Spesifikasyondaki "Requirement Input" ve "Requirement Parsing" bölümleri. Jira kaynağı, "Standard user story format" girdisine karşılık gelir.
-- **Olası parser yapısı:** Spesifikasyonun Adapter yaklaşımına uygun olarak `JiraCsvAdapter` ve ilgili parser. Bu, D-06 ile uyumlu.
+- **Referans:** Spesifikasyondaki "Requirement Input" ve "Requirement Parsing" bölümleri. Spesifikasyon iki format ister: EARS tabanlı requirement'lar ve standart user story formatı. Jira Summary'leri ikisini de içerebilir.
+- **Olası parser yapısı:** Spesifikasyonun Adapter yaklaşımına uygun olarak her format için ayrı parser ve adapter (spesifikasyondaki örnek adlarla `UserStoryAdapter` ve `EARSRequirementAdapter`). Jira CSV okuma işi bunlardan ayrı tutulur. Bu, D-06 ile uyumlu.
+- **Format ayrımı:** Summary'nin hangi formatta olduğunun nasıl belirleneceği (örneğin "As a" ile başlıyorsa user story, "shall" içeriyorsa EARS) henüz belirlenmedi (bkz. A-15).
 
 ---
 
@@ -109,7 +111,7 @@ Bu liste, karar verildikçe ilgili kararlara taşınacak ve buradan kaldırılac
 | A-06 | Hangi AI sağlayıcısı? Ağ bağlantısı ve API maliyeti kabul edilebilir mi? | D-04 | Sağlayıcıdan bağımsız arayüz, varsayılan kapalı |
 | A-07 | Kimlik doğrulama nasıl yapılacak? (Kendi kullanıcı tablosu, şifre hash'leme, oturum yönetimi) | D-05 | Kendi kullanıcı tablosu, hash'li şifre |
 | A-08 | Veritabanı erişim katmanı: JDBC mi, ORM mi? | D-05 | A-02'ye bağlı |
-| A-09 | Spesifikasyondaki EARS formatı bu sürümde desteklenecek mi? | D-03, D-06 | Hayır, ilk sürümde yalnızca Jira user story |
+| A-15 | Summary'nin formatı (user story kalıbı mı EARS mı) nasıl tespit edilecek? Hiçbirine uymayan Summary'ler nasıl raporlanacak? | D-03 | Önce kalıp eşleştirme ile tespit et, uymayanı "unsupported structure" olarak raporla |
 | A-10 | Üretilen Gherkin dosyaları nasıl dışa aktarılacak? (Kopyalama, `.feature` dosyası indirme) | D-02 | A-01'e bağlı |
 | A-11 | Summary'de "so that" bölümü olmayan story'ler (örnekte KAN-10 ve KAN-11) nasıl işlenecek? Hata mı, uyarı mı, eksik alan olarak kabul mi? | D-03 | Uyarı ver, "so that" olmadan da senaryo üret |
 | A-12 | Description sütunu ilk sürümde hiç kullanılmayacak mı, yoksa Summary'deki bilgiyi tamamlamak için kullanılacak mı? | D-03 | İlk sürümde kullanma, sonra ekle |
@@ -122,7 +124,7 @@ Bu liste, karar verildikçe ilgili kararlara taşınacak ve buradan kaldırılac
 
 - Spesifikasyondaki diğer genişletme önerileri (Other BDD formats, alternative test-generation targets, scenario quality analysis) ilk sürüme dahil değildir.
 - Birden fazla kullanıcı için rol tabanlı yetkilendirme.
-- EARS formatı ve diğer girdi formatları (A-09 karara bağlanana kadar).
+- User story kalıbı ve EARS dışındaki girdi formatları.
 
 ---
 
@@ -137,4 +139,5 @@ Bu liste, karar verildikçe ilgili kararlara taşınacak ve buradan kaldırılac
 | Tarih | Değişiklik |
 |-------|------------|
 | 2026-10-24 | İlk sürüm. D-01 ile D-06 arasındaki kararlar ve açık sorular eklendi. |
+| 2026-10-24 | D-03 güncellendi: Summary hem user story kalıbında hem EARS kalıbında olabilir, EARS desteklenecek. Terminoloji eklendi ("user story" = Jira Story issue tipi, "requirement" = genel girdi birimi). A-09 karara bağlandığı için kaldırıldı, A-15 eklendi. |
 | 2026-10-24 | D-03 güncellendi: girdi sütunları Issue Type ve Summary olarak belirlendi. Örnek CSV'den gözlemler eklendi. A-03 karara bağlandığı için kaldırıldı. A-11 – A-14 eklendi, A-04 ve A-09 güncellendi. |
