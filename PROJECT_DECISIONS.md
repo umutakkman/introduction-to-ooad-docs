@@ -6,7 +6,7 @@ Temel referans: [Automated Gherkin and BDD Test Scenario Generator.md](Automated
 Gereksinim dokümanı: [CSE443 - RAD_Template.docx](CSE443%20-%20RAD_Template.docx) (FR-1 – FR-38, NFR-1 – NFR-20)
 Örnek girdi: [Jira Backlog Örneği.csv](Jira%20Backlog%20%C3%96rne%C4%9Fi.csv)
 
-- Son güncelleme: 2026-10-26
+- Son güncelleme: 2026-10-28
 - Durum etiketleri: **Kesinleşti**, **Kısmen karar verildi**, **Karar bekliyor**
 
 ---
@@ -22,6 +22,8 @@ Gereksinim dokümanı: [CSE443 - RAD_Template.docx](CSE443%20-%20RAD_Template.do
 | D-05 | Veri saklama ve kullanıcı sistemi | Gömülü hafif veritabanı, e-posta ve şifre ile login, hash'li şifre, kullanıcı geçmişi | Kısmen karar verildi |
 | D-06 | Spesifikasyon bağlılığı | Referans dokümandaki gereksinimlere ve tasarım kalıplarına sadık kalınacak | Kesinleşti |
 | D-07 | Kalite hedefleri (NFR) | Nonfunctional requirement'lar öğrenci demosu seviyesinde tutulacak | Kesinleşti |
+| D-08 | Feature ve `.feature` dosyası | Her user story için bir Feature, her Feature için bir `.feature` dosyası (bir dosyada yalnızca bir Feature olabilir) | Kesinleşti |
+| D-09 | Use case izlenebilirliği | Her use case bir ya da daha fazla FR'ye bağlanır (ödev şartı). RAD'de 3.4.2 ve Bölüm 6'da tablo olarak verilir | Kesinleşti |
 
 ---
 
@@ -130,6 +132,28 @@ Gereksinim dokümanı: [CSE443 - RAD_Template.docx](CSE443%20-%20RAD_Template.do
 
 ---
 
+### D-08: Feature ve `.feature` Dosyası
+
+- **Karar:** Her user story için **bir Feature** oluşturulur ve her Feature **ayrı bir `.feature` dosyasına** aktarılır (RAD: FR-24, FR-29, NFR-15).
+- **Gerekçe:** Gherkin referansına göre bir `.feature` dosyasında yalnızca tek bir `Feature` olabilir ("You can only have a single `Feature` in a `.feature` file"). Birden fazla Feature içeren dosyayı standart Gherkin parser'ı reddeder. Bu, SC-2'yi (her dosya parser'dan geçer) doğrudan etkiler.
+- **Etkisi:**
+  - Nesne modeli ve Sequence-2 zaten hikâye başına Feature oluşturuyordu, diyagramlarda değişiklik gerekmedi. `UserStory` — `Feature` çokluğu `0..1` olmalı (unsupported ve invalid hikâyelerin Feature'ı yok).
+  - "Tümünü dışa aktar" birden fazla dosya üretir. Dosyaların kullanıcıya nasıl sunulacağı (ZIP ya da klasör) açık (bkz. A-10).
+  - Issue key etiketi (`@KAN-10`) ve Summary yorum satırı (`# Source: …`) dosya içinde kalır (FR-30, FR-31). Her dosya tek hikâyeye ait olduğu için izlenebilirlik daha net.
+  - Epic adı Feature adı olarak kullanılmaz (bkz. Kapsam Dışı). Feature adı hikâyeden türetilir.
+- **Given/When/Then eşlemesi (RAD 3.2.5):** Precondition → Given, trigger (EARS) ya da capability (user story kalıbı) → When, system response ya da capability'nin beklenen sonucu → Then. User story kalıbında açık bir precondition yoktur, Given adımları role ve capability'den türetilir. FR-24 bu yüzden "precondition tanımlıysa **ya da gereksinimden türetilebiliyorsa**" der.
+- **Durum:** Kesinleşti.
+
+---
+
+### D-09: Use Case İzlenebilirliği
+
+- **Karar:** Her use case, bir ya da daha fazla fonksiyonel gereksinime bağlanır. Ödev PDF'i: "each use case should link to one or more functional requirements".
+- **Uygulama:** RAD 3.4.2'de use case tablosu (ID, ad, aktörler, açıklama, FR'ler) ve Bölüm 6'da "Use case → Functional requirements" tablosu. UC-1 – UC-10, FR-1 – FR-38'in tamamını kapsar. Use case diyagramındaki oval'lara aynı UC numaraları yazılmalı.
+- **Durum:** Kesinleşti.
+
+---
+
 ## 3. Açık Sorular
 
 Bu liste, karar verildikçe ilgili kararlara taşınacak ve buradan kaldırılacaktır. Kaldırılan ID'ler yeniden kullanılmaz.
@@ -142,7 +166,7 @@ Bu liste, karar verildikçe ilgili kararlara taşınacak ve buradan kaldırılac
 | A-06 | Hangi AI sağlayıcısı kullanılacak? Ağ bağlantısı ve API maliyeti kabul edilebilir mi? | D-04 | Sağlayıcı arayüzün arkasında kalır, seçim ileriye bırakılabilir |
 | A-07 | Oturum yönetimi ve şifre hash algoritması nasıl olacak? | D-05 | Yerleşik bir parola hash algoritması (örn. bcrypt). Oturum yönetimi A-02'ye bağlı |
 | A-08 | Veritabanı erişim katmanı: JDBC mi, ORM mi? | D-05 | A-02'ye bağlı |
-| A-10 | Dışa aktarılan `.feature` dosyası kullanıcıya nasıl sunulacak? (Web'de indirme, masaüstünde kaydetme penceresi). Kopyalama ve dışa aktarma FR-28 ve FR-29 ile desteklenecek. | D-02 | A-01'e bağlı |
+| A-10 | Dışa aktarılan `.feature` dosyaları kullanıcıya nasıl sunulacak? D-08 gereği her user story için ayrı dosya üretilir. Birden fazla dosya tek bir ZIP olarak mı, bir klasöre mi sunulacak? (Web'de indirme, masaüstünde kaydetme penceresi.) Tek bir hikâyenin dosyası doğrudan indirilebilir. Kopyalama ve dışa aktarma FR-28 ve FR-29 ile desteklenecek. | D-02, D-08 | A-01'e bağlı. Web ise "Export all" için ZIP |
 | A-13 | Tırnak içinde yeni satır içeren çok satırlı alanlar nasıl ele alınacak? (Kodlama UTF-8 olarak belirlendi.) | D-03 | Standart CSV kütüphanesi kullan (tırnaklı alanları doğru okur) |
 | A-15 | Summary'nin formatı (user story kalıbı mı EARS mı) nasıl tespit edilecek? | D-03 | Önce kalıp eşleştirme ile tespit et, uymayanı "unsupported" olarak raporla (FR-16) |
 
@@ -175,3 +199,4 @@ Bu liste, karar verildikçe ilgili kararlara taşınacak ve buradan kaldırılac
 | 2026-10-26 | D-03 güncellendi: Issue key opsiyonel üçüncü sütun olarak eklendi, dışa aktarılan dosyalarda tag olarak kullanılacak. İç izlenebilirlik (senaryo → kaynak satır) açıklandı. D-05'e Issue key'in saklanması eklendi. |
 | 2026-10-26 | D-03 güncellendi: Issue key yoksa kaynak Summary, dışa aktarılan dosyada yorum satırı olarak belirtilecek. A-16 karara bağlandığı için kaldırıldı. |
 | 2026-10-26 | RAD'de 3.2 (FR-1 – FR-38) ve 3.3 (NFR-1 – NFR-20) yazıldığı için karar dokümanı RAD'le hizalandı. D-03'e CSV biçimi (UTF-8) ve işleme kuralları, D-04'e varsayılan kapalı AI, D-05'e kullanıcı sistemi kuralları eklendi. D-07 (kalite hedefleri) eklendi. A-04, A-11, A-12, A-14 karara bağlandığı için kaldırıldı. A-06, A-07, A-10, A-13 daraltıldı. Kapsam dışı listesi genişletildi. |
+| 2026-10-28 | D-08 eklendi: her user story için bir Feature, her Feature için bir `.feature` dosyası (Gherkin'de dosya başına tek Feature). FR-24, FR-29, NFR-15 ve S-5 buna göre değişti, Given/When/Then eşlemesi RAD 3.2.5'e eklendi. A-10 güncellendi (çoklu dosya sunumu). D-09 eklendi: use case → FR izlenebilirlik tabloları (RAD 3.4.2 ve Bölüm 6). |
